@@ -1,0 +1,242 @@
+[project]
+name = "vn-algo-trading"
+version = "0.1.0"
+description = "Vietnamese Algorithmic Trading System with Real-time Analytics"
+authors = [
+    {name = "Vietnamese Algo Trading Team", email = "algo-trading@yourdomain.com"}
+]
+readme = "README1.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["trading", "algorithms", "vietnam", "finance", "analytics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
+dependencies = [
+    # Core data processing
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    
+    # Apache Spark ecosystem
+    "pyspark>=3.5.0",
+    "delta-spark>=3.0.0",
+    
+    # Streaming and messaging
+    "kafka-python>=2.0.0",
+    "confluent-kafka>=2.3.0",
+    
+    # Data validation and quality
+    "great-expectations>=0.18.0",
+    "pandera>=0.17.0",
+    
+    # Database and storage
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "boto3>=1.34.0",
+    "minio>=7.2.0",
+    
+    # ML and analytics
+    "scikit-learn>=1.3.0",
+    "mlflow>=2.8.0",
+    "optuna>=3.4.0",
+    
+    # Visualization
+    "plotly>=5.17.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    
+    # Technical indicators
+    "ta-lib>=0.4.0",
+    "pandas-ta>=0.3.0",
+    
+    # API and web
+    "requests>=2.31.0",
+    "websocket-client>=1.6.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    
+    # Configuration and utilities
+    "pydantic>=2.5.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.1.0",
+    "rich>=13.7.0",
+    "loguru>=0.7.0",
+    
+    # Async programming
+    "asyncio>=3.4.3",
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.2.0",
+    
+    # Workflow orchestration
+    "apache-airflow>=2.8.0",
+    "apache-airflow-providers-postgres>=5.7.0",
+    "apache-airflow-providers-amazon>=8.13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.0",
+    "hypothesis>=6.88.0",
+    
+    # Code quality
+    "black>=23.11.0",
+    "ruff>=0.1.6",
+    "mypy>=1.7.0",
+    "pre-commit>=3.5.0",
+    
+    # Documentation
+    "sphinx>=7.2.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+    
+    # Profiling and debugging
+    "line-profiler>=4.1.0",
+    "memory-profiler>=0.61.0",
+    "py-spy>=0.3.0",
+]
+
+jupyter = [
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "ipywidgets>=8.1.0",
+    "voila>=0.5.0",
+]
+
+superset = [
+    "apache-superset>=3.0.0",
+    "redis>=5.0.0",
+    "celery>=5.3.0",
+]
+
+monitoring = [
+    "prometheus-client>=0.19.0",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    "opentelemetry-instrumentation-fastapi>=0.42b0",
+]
+
+[project.scripts]
+vn-algo = "src.cli:main"
+vn-backtest = "src.backtest.cli:main"
+vn-live = "src.live.cli:main"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel", "pybind11>=2.11.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*" = ["B011", "F403", "F405"]
+
+[tool.ruff.isort]
+known-first-party = ["src"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "ta.*",
+    "pandas_ta.*",
+    "kafka.*",
+    "minio.*",
+    "great_expectations.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "performance: marks tests as performance tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
