@@ -62,12 +62,12 @@ def setup_logging(
     # Define log formats
     if log_format.lower() == "json":
         log_format_str = (
-            '{"time": "{time:YYYY-MM-DD HH:mm:ss.SSS}", '
+            '{{"time": "{time:YYYY-MM-DD HH:mm:ss.SSS}", '
             '"level": "{level}", '
             '"module": "{module}", '
             '"function": "{function}", '
             '"line": {line}, '
-            '"message": "{message}"}'
+            '"message": "{message}"}}'
         )
     else:
         log_format_str = (

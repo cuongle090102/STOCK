@@ -1,0 +1,185 @@
+# Vietnamese Market Data Sources Configuration
+
+data_sources:
+  vnd_direct:
+    name: "VNDirect"
+    enabled: true
+    priority: 2
+    config:
+      base_url: "https://api.vndirect.com.vn"
+      api_key: null  # Set via environment variable VND_DIRECT_API_KEY
+      timeout: 30
+      rate_limit: 60  # requests per minute
+      retry_attempts: 3
+      retry_delay: 1.0
+    capabilities:
+      historical_data: true
+      real_time_data: false  # Limited in free tier
+      intraday_data: false
+      fundamental_data: true
+    
+  ssi_fastconnect:
+    name: "SSI"
+    enabled: true
+    priority: 1  # Highest priority for real-time data
+    config:
+      base_url: "https://iboard.ssi.com.vn"
+      ws_url: "wss://iboard.ssi.com.vn/ws"
+      consumer_id: null  # Set via environment variable SSI_CONSUMER_ID
+      consumer_secret: null  # Set via environment variable SSI_CONSUMER_SECRET
+      timeout: 30
+      reconnect_interval: 5
+      heartbeat_interval: 30
+      max_reconnect_attempts: 10
+    capabilities:
+      historical_data: true
+      real_time_data: true
+      intraday_data: true
+      fundamental_data: false
+    
+  tcbs:
+    name: "TCBS"
+    enabled: true
+    priority: 3
+    config:
+      base_url: "https://apipubaws.tcbs.com.vn/tcanalysis/v1/finance"
+      timeout: 30
+      rate_limit: 100  # requests per minute
+      retry_attempts: 3
+      retry_delay: 1.0
+    capabilities:
+      historical_data: true
+      real_time_data: false  # Latest data only
+      intraday_data: false
+      fundamental_data: true
+
+# Vietnamese Market Configuration
+market_config:
+  timezone: "Asia/Ho_Chi_Minh"
+  currency: "VND"
+  
+  # Trading hours (Vietnam time)
+  trading_hours:
+    morning_session:
+      start: "09:00"
+      end: "11:30"
+    afternoon_session:
+      start: "13:00"
+      end: "15:00"
+  
+  # Market holidays (will be updated annually)
+  holidays:
+    - "2024-01-01"  # New Year
+    - "2024-02-10"  # Lunar New Year
+    - "2024-02-11"  # Lunar New Year
+    - "2024-02-12"  # Lunar New Year
+    - "2024-02-13"  # Lunar New Year
+    - "2024-02-14"  # Lunar New Year
+    - "2024-04-18"  # Hung Kings Day
+    - "2024-04-30"  # Liberation Day
+    - "2024-05-01"  # Labor Day
+    - "2024-09-02"  # National Day
+  
+  # Primary exchanges
+  exchanges:
+    - name: "HOSE"  # Ho Chi Minh Stock Exchange
+      symbols: ["VIC", "VNM", "HPG", "VCB", "FPT", "GAS", "BID", "CTG", "MSN", "PLX"]
+    - name: "HNX"   # Hanoi Stock Exchange
+      symbols: ["SHB", "ACB", "VCS", "CEO", "BVS"]
+    - name: "UPCOM" # Unlisted Public Company Market
+      symbols: ["BSR", "TV2", "AAM"]
+
+# Data Quality Configuration
+data_quality:
+  validation_rules:
+    price_consistency: true  # High >= Open,Close >= Low
+    volume_validation: true  # Volume >= 0
+    missing_data_threshold: 0.02  # Max 2% missing data
+    price_change_threshold: 0.15  # Flag >15% daily changes
+    
+  reconciliation:
+    enabled: true
+    price_tolerance: 0.02  # 2% tolerance between sources
+    volume_tolerance: 0.05  # 5% tolerance for volume
+    
+  data_retention:
+    raw_data: "2 years"
+    processed_data: "5 years"
+    logs: "90 days"
+
+# Default symbols for monitoring and testing
+default_symbols:
+  vn30:
+    - "VIC"   # Vingroup
+    - "VNM"   # Vietnam Dairy Products
+    - "HPG"   # Hoa Phat Group
+    - "VCB"   # Vietcombank
+    - "FPT"   # FPT Corporation
+    - "GAS"   # PetroVietnam Gas
+    - "BID"   # BIDV
+    - "CTG"   # VietinBank
+    - "MSN"   # Masan Group
+    - "PLX"   # Petrolimex
+    - "VRE"   # Vincom Retail
+    - "TPB"   # TPBank
+    - "MWG"   # Mobile World
+    - "SSI"   # SSI Securities
+    - "POW"   # PetroVietnam Power
+    - "TCB"   # Techcombank
+    - "VHM"   # Vinhomes
+    - "ACB"   # Asia Commercial Bank
+    - "SAB"   # Sabeco
+    - "KDH"   # Khang Dien House
+    - "PDR"   # Phu Nhuan Jewelry
+    - "DGC"   # Duc Giang Chemicals
+    - "VJC"   # VietJet Aviation
+    - "SBT"   # Thanh Cong Textile
+    - "NVL"   # No Va Land
+    - "PNJ"   # Phu Nhuan Jewelry
+    - "DHG"   # Hau Giang Pharma
+    - "VIB"   # VIB Bank
+    - "EIB"   # Eximbank
+    - "HDB"   # HD Bank
+  
+  test_symbols:
+    - "VIC"
+    - "VNM"
+    - "HPG"
+
+# Rate limiting and circuit breaker configuration
+resilience:
+  rate_limiting:
+    global_limit: 200  # Total requests per minute across all sources
+    per_source_limit: 100  # Requests per minute per source
+    
+  circuit_breaker:
+    failure_threshold: 5  # Number of failures before opening circuit
+    recovery_timeout: 60  # Seconds to wait before trying again
+    success_threshold: 3  # Successful requests needed to close circuit
+    
+  retry_policy:
+    max_attempts: 3
+    initial_delay: 1.0  # seconds
+    backoff_multiplier: 2.0
+    max_delay: 30.0  # seconds
+
+# Monitoring and alerting
+monitoring:
+  health_check_interval: 300  # seconds (5 minutes)
+  
+  alerts:
+    data_source_down:
+      enabled: true
+      threshold: 1  # Alert if any source is down
+    
+    data_quality_issues:
+      enabled: true
+      threshold: 0.1  # Alert if quality score < 0.1
+    
+    rate_limit_exceeded:
+      enabled: true
+      threshold: 0.9  # Alert at 90% of rate limit
+    
+    high_latency:
+      enabled: true
+      threshold: 10.0  # Alert if response time > 10 seconds
